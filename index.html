@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="//cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.js"></script>
+  </head>
+  <body>
+    <script>
+      var config = {
+        type: Phaser.AUTO,
+        width: 1600,
+        height: 800,
+        physics: {
+          default: "arcade",
+          arcade: {
+            // gravity: { y: 400 },
+          },
+        },
+        scene: {
+          preload: preload,
+          create: create,
+          update: update,
+        },
+      };
+
+      var game = new Phaser.Game(config);
+      var letter;
+      var cursors;
+      var bullet;
+      var shootInterval;
+      var bullets;
+      var rotationSpeed = 0.5;
+
+      function preload() {
+        this.load.image("letter", "letter.png");
+        this.load.image("bullet", "bullet.png");
+      }
+
+      function create() {
+        shootInterval = null;
+
+        this.cameras.main.setBackgroundColor("#1CF847");
+        this.input.keyboard.on("keydown", handleKeyDown);
+        this.input.keyboard.on("keyup", handleKeyUp);
+
+        bullet = this.physics.add.sprite(-100, -100, "bullet");
+        bullet.visible = false;
+        letter = this.physics.add.sprite(
+          config.width / 2,
+          config.height / 2,
+          "letter"
+        );
+        cursors = this.input.keyboard.createCursorKeys();
+        function handleKeyDown(event) {
+          if (event.code === "KeyZ") {
+            startFiring();
+          }
+        }
+        function handleKeyUp(event) {
+          if (event.code === "KeyZ") {
+            stopFiring();
+          }
+        }
+        bullets = this.physics.add.group({
+          defaultKey: "bullet",
+          runChildUpdate: true,
+        });
+      }
+
+      function update() {
+        if (cursors.left.isDown) {
+          letter.setVelocityX(-400);
+        } else if (cursors.right.isDown) {
+          letter.setVelocityX(400);
+        } else {
+          letter.setVelocityX(0);
+        }
+        if (cursors.up.isDown) {
+          letter.setVelocityY(-400);
+        } else if (cursors.down.isDown) {
+          letter.setVelocityY(400);
+        } else {
+          letter.setVelocityY(0);
+        }
+        if (letter.x > game.config.width) {
+          letter.x = 0;
+        } else if (letter.x < 0) {
+          letter.x = game.config.width;
+        }
+
+        if (letter.y > game.config.height) {
+          letter.y = 0;
+        } else if (letter.y < 0) {
+          letter.y = game.config.height;
+        }
+        bullets.getChildren().forEach(function (bullet) {
+          bullet.rotation += rotationSpeed;
+        });
+      }
+      function shootBullet() {
+        var bullet = bullets.get(letter.x, letter.y);
+        if (bullet) {
+          bullet.setActive(true);
+          bullet.setVisible(true);
+          bullet.body.setAllowGravity(false);
+          bullet.setVelocityY(-1000);
+          bullet.rotation = Phaser.Math.FloatBetween(0, 360);
+        }
+      }
+      function startFiring() {
+        clearInterval(shootInterval);
+        shootBullet();
+        shootInterval = setInterval(shootBullet, 100);
+      }
+      function stopFiring() {
+        clearInterval(shootInterval);
+      }
+    </script>
+  </body>
+</html>
