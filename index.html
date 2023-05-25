@@ -27,31 +27,33 @@
       };
 
       var game = new Phaser.Game(config);
-      var letter;
+      var character;
       var cursors;
       var bullet;
       var shootInterval;
       var bullets;
-      var rotationSpeed = 0.5;
-
+      // var rotationSpeed = 0.5;
+      var bomb;
       function preload() {
-        this.load.image("letter", "letter.png");
-        this.load.image("bullet", "bullet.png");
+        this.load.image("character", "./images/character.png");
+        this.load.image("bullet", "./images/bullet.png");
+        this.load.image("background", "./images/background.jpg");
       }
 
       function create() {
         shootInterval = null;
-
-        this.cameras.main.setBackgroundColor("#1CF847");
+        var backgroundImage = this.add.image(0, 0, "background").setOrigin(0);
+        backgroundImage.displayWidth = this.sys.canvas.width;
+        backgroundImage.displayHeight = this.sys.canvas.height;
         this.input.keyboard.on("keydown", handleKeyDown);
         this.input.keyboard.on("keyup", handleKeyUp);
 
         bullet = this.physics.add.sprite(-100, -100, "bullet");
         bullet.visible = false;
-        letter = this.physics.add.sprite(
+        character = this.physics.add.sprite(
           config.width / 2,
           config.height / 2,
-          "letter"
+          "character"
         );
         cursors = this.input.keyboard.createCursorKeys();
         function handleKeyDown(event) {
@@ -72,42 +74,42 @@
 
       function update() {
         if (cursors.left.isDown) {
-          letter.setVelocityX(-400);
+          character.setVelocityX(-400);
         } else if (cursors.right.isDown) {
-          letter.setVelocityX(400);
+          character.setVelocityX(400);
         } else {
-          letter.setVelocityX(0);
+          character.setVelocityX(0);
         }
         if (cursors.up.isDown) {
-          letter.setVelocityY(-400);
+          character.setVelocityY(-400);
         } else if (cursors.down.isDown) {
-          letter.setVelocityY(400);
+          character.setVelocityY(400);
         } else {
-          letter.setVelocityY(0);
+          character.setVelocityY(0);
         }
-        if (letter.x > game.config.width) {
-          letter.x = 0;
-        } else if (letter.x < 0) {
-          letter.x = game.config.width;
+        if (character.x > game.config.width) {
+          character.x = 0;
+        } else if (character.x < 0) {
+          character.x = game.config.width;
         }
 
-        if (letter.y > game.config.height) {
-          letter.y = 0;
-        } else if (letter.y < 0) {
-          letter.y = game.config.height;
+        if (character.y > game.config.height) {
+          character.y = 0;
+        } else if (character.y < 0) {
+          character.y = game.config.height;
         }
-        bullets.getChildren().forEach(function (bullet) {
-          bullet.rotation += rotationSpeed;
-        });
+        // bullets.getChildren().forEach(function (bullet) {
+        //   bullet.rotation += rotationSpeed;
+        // });
       }
       function shootBullet() {
-        var bullet = bullets.get(letter.x, letter.y);
+        var bullet = bullets.get(character.x, character.y);
         if (bullet) {
           bullet.setActive(true);
           bullet.setVisible(true);
           bullet.body.setAllowGravity(false);
-          bullet.setVelocityY(-1000);
-          bullet.rotation = Phaser.Math.FloatBetween(0, 360);
+          bullet.setVelocityY(-1500);
+          // bullet.rotation = Phaser.Math.FloatBetween(0, 360);
         }
       }
       function startFiring() {
@@ -118,6 +120,14 @@
       function stopFiring() {
         clearInterval(shootInterval);
       }
+      var sceneConfig = {
+        preload: preload,
+        create: create,
+        update: update,
+      };
+
+      game.scene.add("main", sceneConfig);
+      game.scene.start("main");
     </script>
   </body>
 </html>
